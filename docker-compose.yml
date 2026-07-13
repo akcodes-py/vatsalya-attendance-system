@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # This represents our Django backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # This syncs your local code with the container, so you don't have to rebuild when you edit code!
+      - ./backend:/app
+
+  # This represents our React frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Prevents local node_modules from overriding container's
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Helps React automatically reload on Windows
+    depends_on:
+      - backend
