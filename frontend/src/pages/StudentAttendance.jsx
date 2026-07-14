@@ -17,7 +17,7 @@ function StudentAttendance() {
       // Set default attendance as Present for all
       const defaultAttendance = {};
       res.data.forEach((s) => {
-      defaultAttendance[s.id] = 'P'; '\'
+        defaultAttendance[s.id] = 'P';
       });
       setAttendance(defaultAttendance);
     });
