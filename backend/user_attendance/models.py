@@ -13,6 +13,7 @@ class UserAttendance(models.Model):
     check_in = models.TimeField(null=True, blank=True)
     check_out = models.TimeField(null=True, blank=True)
     status = models.CharField(max_length=1, choices=STATUS)
+    photo = models.ImageField(upload_to='attendance_photos/', null=True, blank=True)
 
     class Meta:
         unique_together = ("user", "date")

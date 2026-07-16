@@ -57,15 +57,24 @@ function MarkAttendance() {
     setMessage('');
     setError('');
     try {
+      // Convert base64 data URL to a binary blob for file upload
+      const base64Response = await fetch(photo);
+      const blob = await base64Response.blob();
+
+      const formData = new FormData();
+      formData.append('photo', blob, 'attendance.png');
+      formData.append('date', today);
+      formData.append('status', 'P');
+      formData.append('check_in', new Date().toTimeString().split(' ')[0]);
+
       await axios.post(
         'http://127.0.0.1:8000/api/user-attendance/',
+        formData,
         {
-          date: today,
-          status: 'P',
-          check_in: new Date().toTimeString().split(' ')[0],
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          },
         }
       );
       setMessage('✅ Attendance marked successfully for today!');
