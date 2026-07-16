@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from django.db import IntegrityError
 from .models import UserAttendance
 from .serializers import UserAttendanceSerializer
 import datetime
@@ -19,8 +21,13 @@ class UserAttendanceViewSet(viewsets.ModelViewSet):
         return UserAttendance.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # Automatically save the logged-in user as the attendance user
-        serializer.save(user=self.request.user)
+        # Automatically save the logged-in user as the attendance user.
+        # If attendance already exists for today, catch the error and
+        # return a friendly 400 message instead of crashing with 500.
+        try:
+            serializer.save(user=self.request.user)
+        except IntegrityError:
+            raise ValidationError("Attendance already marked for today.")
 
     @action(detail=False, methods=['get'])
     def calendar(self, request):
