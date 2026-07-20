@@ -35,12 +35,12 @@ jobs:
       with:
         node-version: "18"
         
-    - name: Install Frontend Dependencies
+    - name: Install React.js Dependencies
       run: |
         cd frontend
         npm install
         
-    - name: Build Frontend
+    - name: Build React.js Frontend
       run: |
         cd frontend
         CI=false npm run build

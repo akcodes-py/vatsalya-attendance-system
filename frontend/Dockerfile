@@ -7,7 +7,7 @@ WORKDIR /app
 # 3. Copy our package list into the container
 COPY package.json .
 
-# 4. Install all the React packages
+# 4. Install all the React.js packages
 RUN npm install
 
 # 5. Copy the rest of our frontend code into the container
@@ -16,5 +16,5 @@ COPY . .
 # 6. Expose port 3000 so the outside world can connect
 EXPOSE 3000
 
-# 7. Start the React development server!
+# 7. Start the React.js development server!
 CMD ["npm", "start"]

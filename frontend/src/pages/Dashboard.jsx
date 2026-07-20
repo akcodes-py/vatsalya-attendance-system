@@ -1,176 +1,99 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 function Dashboard() {
-  const navigate = useNavigate();
-  const role = localStorage.getItem('role');
-  const username = localStorage.getItem('username');
-  const [dark, setDark] = useState(true);
-  const [hoveredCard, setHoveredCard] = useState(null);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/');
-  };
+  const navigate  = useNavigate();
+  const role      = localStorage.getItem('role')     || 'user';
+  const username  = localStorage.getItem('username') || 'User';
 
   const avatarLetter = username ? username[0].toUpperCase() : 'U';
 
-  // Theme colors
-  const theme = {
-    page: dark ? '#121212' : '#f5f5f5',
-    container: dark ? '#121212' : '#f5f5f5',
-    card: dark ? '#1e1e1e' : '#ffffff',
-    cardHover: dark ? '#2a2a2a' : '#e8e8e8',
-    cardBorder: dark ? '#2a2a2a' : '#ddd',
-    text: dark ? '#ffffff' : '#111111',
-    subText: dark ? '#aaa' : '#555',
-    sectionLabel: dark ? '#888' : '#666',
-    logoutBg: dark ? '#3a0000' : '#ffe5e5',
-    logoutText: dark ? '#ff6b6b' : '#cc0000',
-    toggleBg: dark ? '#2a2a2a' : '#e0e0e0',
-    toggleText: dark ? '#ffffff' : '#111111',
-  };
-
-  const cardStyle = (id) => ({
-    background: hoveredCard === id ? theme.cardHover : theme.card,
-    border: `1px solid ${theme.cardBorder}`,
-    borderRadius: '12px',
-    padding: '20px 16px',
-    cursor: 'pointer',
-    transition: 'background 0.2s, transform 0.15s',
-    transform: hoveredCard === id ? 'scale(1.03)' : 'scale(1)',
-  });
-
-  const wideCardStyle = (id) => ({
-    ...cardStyle(id),
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '14px',
-  });
-
   return (
-    <div style={{ minHeight: '100vh', background: theme.page, display: 'flex', justifyContent: 'center', padding: '20px', transition: 'background 0.3s' }}>
-      <div style={{ width: '100%', maxWidth: '500px', paddingBottom: '30px' }}>
+    <div className="min-h-screen bg-[#f7f8fc] font-['Inter',sans-serif]">
+      <Navbar pageTitle="Dashboard" pageIcon="📊" />
 
-        {/* Fixed Top-Right — Dark/Light Mode Toggle */}
-        <button
-          onClick={() => setDark(!dark)}
-          title={dark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          style={{
-            position: 'fixed',
-            top: '16px',
-            right: '16px',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            border: 'none',
-            cursor: 'pointer',
-            background: dark ? '#2a2a2a' : '#e0e0e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '17px',
-            boxShadow: dark ? '0 0 8px rgba(255,255,255,0.15)' : '0 0 8px rgba(0,0,0,0.2)',
-            transition: 'background 0.3s, transform 0.2s',
-            zIndex: 999,
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          {dark ? '☀️' : '🌙'}
-        </button>
+      <div className="max-w-[500px] mx-auto px-7 py-9">
 
-        {/* Header — Avatar + Welcome */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '30px', marginTop: '10px' }}>
-          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#1a73e8', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', flexShrink: 0 }}>
+        {/* Welcome header */}
+        <div className="bg-white border border-gray-200 rounded-[14px] shadow-[0_1px_4px_rgba(0,0,0,0.07)] p-6 flex items-center gap-4.5 mb-2">
+          <div className="w-[54px] h-[54px] rounded-full bg-gradient-to-br from-[#3d28b0] to-purple-600 text-white flex items-center justify-center text-[22px] font-extrabold shrink-0 shadow-md shadow-[#3d28b0]/25">
             {avatarLetter}
           </div>
           <div>
-            <h2 style={{ color: theme.text, margin: 0, fontSize: '22px', fontWeight: 'bold' }}>Welcome, {username}</h2>
-            <p style={{ color: theme.subText, margin: '4px 0 0 0', fontSize: '14px' }}>Role: {role}</p>
+            <p className="text-xl font-bold text-gray-900 leading-tight">Welcome, {username}</p>
+            <p className="text-[13px] text-gray-500 mt-1 capitalize">Role: {role}</p>
           </div>
         </div>
 
-        {/* Section: My Attendance */}
-        <p style={{ color: theme.sectionLabel, fontSize: '13px', fontWeight: '700', letterSpacing: '1px', marginBottom: '10px', marginTop: '20px' }}>MY ATTENDANCE</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        {/* ── MY ATTENDANCE ── */}
+        <p className="text-[12px] font-bold tracking-widest text-gray-400 uppercase mt-7 mb-3">My Attendance</p>
+        <div className="grid grid-cols-2 gap-3.5">
 
           <div
-            style={cardStyle('mark')}
             onClick={() => navigate('/mark-attendance')}
-            onMouseEnter={() => setHoveredCard('mark')}
-            onMouseLeave={() => setHoveredCard(null)}
+            className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.07)] hover:shadow-lg hover:-translate-y-[3px] hover:border-indigo-300 transition-all duration-200 group"
           >
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#1a73e8', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '20px' }}>📷</div>
-            <p style={{ color: theme.text, margin: 0, fontSize: '15px', fontWeight: '600' }}>Mark my attendance</p>
+            <div className="w-12 h-12 rounded-[11px] bg-blue-100 flex items-center justify-center text-[22px] mb-3.5 group-hover:scale-105 transition-transform duration-200">
+              📷
+            </div>
+            <p className="text-[15px] font-semibold text-gray-900 leading-snug">Mark my attendance</p>
           </div>
 
           <div
-            style={cardStyle('cal')}
             onClick={() => navigate('/calendar')}
-            onMouseEnter={() => setHoveredCard('cal')}
-            onMouseLeave={() => setHoveredCard(null)}
+            className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.07)] hover:shadow-lg hover:-translate-y-[3px] hover:border-indigo-300 transition-all duration-200 group"
           >
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '20px' }}>📅</div>
-            <p style={{ color: theme.text, margin: 0, fontSize: '15px', fontWeight: '600' }}>My attendance calendar</p>
+            <div className="w-12 h-12 rounded-[11px] bg-purple-100 flex items-center justify-center text-[22px] mb-3.5 group-hover:scale-105 transition-transform duration-200">
+              📅
+            </div>
+            <p className="text-[15px] font-semibold text-gray-900 leading-snug">My attendance calendar</p>
           </div>
 
         </div>
 
-        {/* Section: Students */}
-        <p style={{ color: theme.sectionLabel, fontSize: '13px', fontWeight: '700', letterSpacing: '1px', marginBottom: '10px', marginTop: '24px' }}>STUDENTS</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        {/* ── STUDENTS ── */}
+        <p className="text-[12px] font-bold tracking-widest text-gray-400 uppercase mt-7 mb-3">Students</p>
+        <div className="grid grid-cols-2 gap-3.5">
 
           <div
-            style={cardStyle('statt')}
             onClick={() => navigate('/student-attendance')}
-            onMouseEnter={() => setHoveredCard('statt')}
-            onMouseLeave={() => setHoveredCard(null)}
+            className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.07)] hover:shadow-lg hover:-translate-y-[3px] hover:border-green-300 transition-all duration-200 group"
           >
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '20px' }}>✅</div>
-            <p style={{ color: theme.text, margin: 0, fontSize: '15px', fontWeight: '600' }}>Mark student attendance</p>
+            <div className="w-12 h-12 rounded-[11px] bg-green-100 flex items-center justify-center text-[22px] mb-3.5 group-hover:scale-105 transition-transform duration-200">
+              ✅
+            </div>
+            <p className="text-[15px] font-semibold text-gray-900 leading-snug">Mark student attendance</p>
           </div>
 
           {role === 'admin' && (
             <div
-              style={cardStyle('stmng')}
               onClick={() => navigate('/manage-students')}
-              onMouseEnter={() => setHoveredCard('stmng')}
-              onMouseLeave={() => setHoveredCard(null)}
+              className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.07)] hover:shadow-lg hover:-translate-y-[3px] hover:border-yellow-300 transition-all duration-200 group"
             >
-              <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', fontSize: '20px' }}>🎓</div>
-              <p style={{ color: theme.text, margin: 0, fontSize: '15px', fontWeight: '600' }}>Manage students</p>
+              <div className="w-12 h-12 rounded-[11px] bg-yellow-100 flex items-center justify-center text-[22px] mb-3.5 group-hover:scale-105 transition-transform duration-200">
+                🎓
+              </div>
+              <p className="text-[15px] font-semibold text-gray-900 leading-snug">Manage students</p>
             </div>
           )}
 
         </div>
 
-        {/* Section: Admin */}
+        {/* ── ADMIN ── */}
         {role === 'admin' && (
           <>
-            <p style={{ color: theme.sectionLabel, fontSize: '13px', fontWeight: '700', letterSpacing: '1px', marginBottom: '10px', marginTop: '24px' }}>ADMIN</p>
+            <p className="text-[12px] font-bold tracking-widest text-gray-400 uppercase mt-7 mb-3">Admin</p>
             <div
-              style={wideCardStyle('usrmng')}
               onClick={() => navigate('/manage-users')}
-              onMouseEnter={() => setHoveredCard('usrmng')}
-              onMouseLeave={() => setHoveredCard(null)}
+              className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.07)] hover:shadow-lg hover:-translate-y-[3px] hover:border-gray-400 transition-all duration-200 flex items-center gap-4 group"
             >
-              <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>👥</div>
-              <p style={{ color: theme.text, margin: 0, fontSize: '15px', fontWeight: '600' }}>Manage users</p>
+              <div className="w-12 h-12 rounded-[11px] bg-slate-100 flex items-center justify-center text-[22px] shrink-0 group-hover:scale-105 transition-transform duration-200">
+                👥
+              </div>
+              <p className="text-[15px] font-semibold text-gray-900 leading-snug">Manage users</p>
             </div>
           </>
         )}
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          onMouseEnter={(e) => e.target.style.opacity = '0.85'}
-          onMouseLeave={(e) => e.target.style.opacity = '1'}
-          style={{ marginTop: '30px', width: '100%', padding: '14px', background: '#c0392b', color: '#ffffff', border: 'none', borderRadius: '12px', fontSize: '16px', cursor: 'pointer', fontWeight: '600', transition: 'opacity 0.2s' }}
-        >
-          🚪 Logout
-        </button>
 
       </div>
     </div>

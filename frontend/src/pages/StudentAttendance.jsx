@@ -1,26 +1,28 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 function StudentAttendance() {
-  const [students, setStudents] = useState([]);
-  const [attendance, setAttendance] = useState({}); // { studentId: 'P' or 'A' }
-  const [message, setMessage] = useState('');
-  const token = localStorage.getItem('token');
-  const today = new Date().toISOString().split('T')[0];
+  const [students,   setStudents]   = useState([]);
+  const [attendance, setAttendance] = useState({});
+  const [message,    setMessage]    = useState('');
+  const [loading,    setLoading]    = useState(false);
+  const navigate = useNavigate();
+  const token    = localStorage.getItem('token');
+  const today    = new Date().toISOString().split('T')[0];
 
-  // Load all students when page opens
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/students/', {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => {
-      setStudents(res.data);
-      // Set default attendance as Present for all
-      const defaultAttendance = {};
-      res.data.forEach((s) => {
-        defaultAttendance[s.id] = 'P';
+    axios
+      .get('http://127.0.0.1:8000/api/students/', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setStudents(res.data);
+        const defaults = {};
+        res.data.forEach((s) => { defaults[s.id] = 'P'; });
+        setAttendance(defaults);
       });
-      setAttendance(defaultAttendance);
-    });
   }, []);
 
   const handleChange = (studentId, status) => {
@@ -29,85 +31,135 @@ function StudentAttendance() {
 
   const handleSubmit = async () => {
     setMessage('');
+    setLoading(true);
     try {
-      // Submit attendance for each student
       for (const student of students) {
         await axios.post(
           'http://127.0.0.1:8000/api/student-attendance/',
-          {
-            student: student.id,
-            date: today,
-            status: attendance[student.id],
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { student: student.id, date: today, status: attendance[student.id] },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       }
-      setMessage('✅ Student attendance saved for today!');
+      setMessage('success');
     } catch (err) {
-      setMessage('⚠️ Already submitted for today or something went wrong.');
+      setMessage('error');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const presentCount = Object.values(attendance).filter((v) => v === 'P').length;
+
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
-      <h2>Student Attendance</h2>
-      <p>Date: <strong>{today}</strong></p>
+    <div className="min-h-screen bg-[#f7f8fc] font-['Inter',sans-serif]">
+      <Navbar pageTitle="Student Attendance" pageIcon="✅" />
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-        <thead>
-          <tr style={{ background: '#f0f0f0' }}>
-            <th style={thStyle}>Name</th>
-            <th style={thStyle}>Class</th>
-            <th style={thStyle}>Present</th>
-            <th style={thStyle}>Absent</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student) => (
-            <tr key={student.id}>
-              <td style={tdStyle}>{student.name}</td>
-              <td style={tdStyle}>{student.class_name}</td>
-              <td style={tdStyle}>
-                <input
-                  type="radio"
-                  name={`attendance-${student.id}`}
-                  checked={attendance[student.id] === 'P'}
-                  onChange={() => handleChange(student.id, 'P')}
-                />
-              </td>
-              <td style={tdStyle}>
-                <input
-                  type="radio"
-                  name={`attendance-${student.id}`}
-                  checked={attendance[student.id] === 'A'}
-                  onChange={() => handleChange(student.id, 'A')}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="max-w-[880px] mx-auto px-7 py-9">
 
-      <button
-        onClick={handleSubmit}
-        style={{ marginTop: '20px', padding: '10px 30px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-      >
-        Submit Attendance
-      </button>
+        {/* Heading */}
+        <div className="flex items-center justify-between mt-6 mb-6">
+          <div>
+            <h2 className="text-[22px] font-bold text-gray-900 mb-1">Student Attendance</h2>
+            <p className="text-sm text-gray-500 mb-0">📅 {today}</p>
+          </div>
+          <span className="bg-[#fef08a] text-[#713f12] border border-[#fde047] text-xs px-3 py-1 rounded-full font-bold">
+            {presentCount} / {students.length} Present
+          </span>
+        </div>
 
-      {message && <p style={{ marginTop: '15px', color: message.startsWith('✅') ? 'green' : 'orange' }}>{message}</p>}
+        {/* Table */}
+        <div className="overflow-x-auto rounded-[10px] border border-gray-200 bg-white">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-[#f7f8fc] border-b-[2px] border-gray-200">
+                <th className="px-4 py-3 text-left text-[11px] font-bold tracking-wide uppercase text-gray-500 whitespace-nowrap">Name</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold tracking-wide uppercase text-gray-500 whitespace-nowrap">Class</th>
+                <th className="px-4 py-3 text-left text-[11px] font-bold tracking-wide uppercase text-gray-500 whitespace-nowrap">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="text-center text-gray-500 p-8">
+                    No students found.
+                  </td>
+                </tr>
+              ) : (
+                students.map((student) => (
+                  <tr key={student.id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="px-4 py-3.5 text-gray-900 font-semibold align-middle">{student.name}</td>
+                    <td className="px-4 py-3.5 text-gray-500 align-middle">{student.class_name}</td>
+                    <td className="px-4 py-3.5 align-middle">
+                      <div className="flex items-center gap-1.5">
+                        <label
+                          className={`inline-flex items-center gap-1 cursor-pointer text-[13px] font-medium px-2.5 py-1 rounded-full border-[1.5px] transition-colors duration-150 ${
+                            attendance[student.id] === 'P'
+                              ? 'bg-[#dcfce7] border-green-600 text-green-600'
+                              : 'border-gray-200 bg-transparent text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            className="hidden"
+                            name={`att-${student.id}`}
+                            checked={attendance[student.id] === 'P'}
+                            onChange={() => handleChange(student.id, 'P')}
+                          />
+                          Present
+                        </label>
+                        <label
+                          className={`inline-flex items-center gap-1 cursor-pointer text-[13px] font-medium px-2.5 py-1 rounded-full border-[1.5px] transition-colors duration-150 ${
+                            attendance[student.id] === 'A'
+                              ? 'bg-[#fee2e2] border-red-600 text-red-600'
+                              : 'border-gray-200 bg-transparent text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            className="hidden"
+                            name={`att-${student.id}`}
+                            checked={attendance[student.id] === 'A'}
+                            onChange={() => handleChange(student.id, 'A')}
+                          />
+                          Absent
+                        </label>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <br />
-      <button onClick={() => window.history.back()} style={{ marginTop: '10px', cursor: 'pointer' }}>
-        ← Back
-      </button>
+        {/* Submit */}
+        <div className="flex items-center gap-2.5 mt-6">
+          <button
+            onClick={handleSubmit}
+            disabled={loading || students.length === 0}
+            className="bg-[#3d28b0] hover:bg-[#4c35c7] text-white px-6 py-2.5 rounded-md text-sm font-semibold tracking-wide shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center disabled:opacity-55 disabled:hover:translate-y-0 disabled:shadow-none"
+          >
+            {loading ? 'Saving…' : '✅ Submit Attendance'}
+          </button>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="bg-transparent border-[1.5px] border-gray-200 text-gray-500 px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+          >
+            ← Back
+          </button>
+        </div>
+
+        {/* Messages */}
+        {message === 'success' && (
+          <div className="mt-3.5 bg-[#dcfce7] text-green-600 border border-green-200 px-4 py-3 rounded-md text-sm font-medium">✅ Student attendance saved for today!</div>
+        )}
+        {message === 'error' && (
+          <div className="mt-3.5 bg-[#fef9c3] text-yellow-800 border border-yellow-300 px-4 py-3 rounded-md text-sm font-medium">⚠️ Already submitted for today or something went wrong.</div>
+        )}
+
+      </div>
     </div>
   );
 }
-
-const thStyle = { padding: '10px', border: '1px solid #ccc', textAlign: 'center' };
-const tdStyle = { padding: '10px', border: '1px solid #ccc', textAlign: 'center' };
 
 export default StudentAttendance;
