@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -11,8 +11,8 @@ function Calendar() {
   const token    = localStorage.getItem('token');
 
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api/user-attendance/calendar/?month=${month}&year=${year}`, {
+    api
+      .get(`/api/user-attendance/calendar/?month=${month}&year=${year}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setAttendance(res.data.attendance));

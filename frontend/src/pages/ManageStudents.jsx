@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -13,8 +13,8 @@ function ManageStudents() {
   const token    = localStorage.getItem('token');
 
   const loadStudents = () => {
-    axios
-      .get('http://127.0.0.1:8000/api/students/', {
+    api
+      .get('/api/students/', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setStudents(res.data));
@@ -27,8 +27,8 @@ function ManageStudents() {
     setMessage('');
     setLoading(true);
     try {
-      await axios.post(
-        'http://127.0.0.1:8000/api/students/',
+      await api.post(
+        '/api/students/',
         { name: newName, class_name: newClass, created_At: new Date().toISOString() },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -46,7 +46,7 @@ function ManageStudents() {
   const handleDelete = async (studentId) => {
     if (!window.confirm('Delete this student? This action cannot be undone.')) return;
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/students/${studentId}/`, {
+      await api.delete(`/api/students/${studentId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       loadStudents();

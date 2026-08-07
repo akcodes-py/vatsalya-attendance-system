@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -19,8 +19,8 @@ function ManageUsers() {
   const token    = localStorage.getItem('token');
 
   const loadUsers = () => {
-    axios
-      .get('http://127.0.0.1:8000/api/users/', {
+    api
+      .get('/api/users/', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUsers(res.data));
@@ -37,7 +37,7 @@ function ManageUsers() {
     setMessage('');
     setLoading(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/users/', form, {
+      await api.post('/api/users/', form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage('success');
@@ -53,7 +53,7 @@ function ManageUsers() {
   const handleDelete = async (userId) => {
     if (!window.confirm('Delete this user? This action cannot be undone.')) return;
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/users/${userId}/`, {
+      await api.delete(`/api/users/${userId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       loadUsers();

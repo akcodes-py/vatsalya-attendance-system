@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -13,8 +13,8 @@ function StudentAttendance() {
   const today    = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    axios
-      .get('http://127.0.0.1:8000/api/students/', {
+    api
+      .get('/api/students/', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -34,8 +34,8 @@ function StudentAttendance() {
     setLoading(true);
     try {
       for (const student of students) {
-        await axios.post(
-          'http://127.0.0.1:8000/api/student-attendance/',
+        await api.post(
+          '/api/student-attendance/',
           { student: student.id, date: today, status: attendance[student.id] },
           { headers: { Authorization: `Bearer ${token}` } }
         );

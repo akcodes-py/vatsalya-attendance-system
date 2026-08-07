@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -63,7 +63,7 @@ function MarkAttendance() {
       formData.append('status',    'P');
       formData.append('check_in',  new Date().toTimeString().split(' ')[0]);
 
-      await axios.post('http://127.0.0.1:8000/api/user-attendance/', formData, {
+      await api.post('/api/user-attendance/', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
