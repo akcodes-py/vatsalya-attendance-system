@@ -1,28 +1,35 @@
 version: '3.8'
 
 services:
-  # This represents our Django backend
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      # This syncs your local code with the container, so you don't have to rebuild when you edit code!
-      - ./backend:/app
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - DATABASE_URL=${DATABASE_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      # AWS S3 for media storage (optional)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME:-us-east-1}
+    restart: unless-stopped
 
-  # This represents our React.js frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # The backend API URL is baked into the frontend bundle at build time
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000}
     ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules # Prevents local node_modules from overriding container's
-    environment:
-      - CHOKIDAR_USEPOLLING=true # Helps React.js automatically reload on Windows
+      - "80:80"
     depends_on:
       - backend
+    restart: unless-stopped

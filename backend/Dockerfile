@@ -1,21 +1,30 @@
-# 1. Grab a small Linux computer with Python 3.10 installed
-FROM python:3.10-slim
+# Use an official slim Python image
+FROM python:3.11-slim
 
-# 2. Make a folder inside the container called /app
+# Set working directory
 WORKDIR /app
 
-# 3. Copy our requirements list into the container
-# (We assume requirements.txt is inside the backend folder)
+# Install system dependencies needed for psycopg2, Pillow, etc.
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    libffi-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. Install all the Python packages from that list
-RUN pip install -r requirements.txt
-
-# 5. Copy the rest of our backend code into the container
+# Copy all backend source code
 COPY . .
 
-# 6. Expose port 8000 so the outside world can connect
+# Collect static files (Whitenoise will serve them)
+RUN python manage.py collectstatic --noinput
+
+# Expose port 8000
 EXPOSE 8000
 
-# 7. Start the Django server!
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Start production server using gunicorn
+CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]

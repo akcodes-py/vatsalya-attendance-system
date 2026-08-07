@@ -1,20 +1,30 @@
-# 1. Grab a small Linux computer with Node.js 18 installed
-FROM node:18-alpine
+# ── Stage 1: Build the React app ─────────────────────────────────────────────
+FROM node:20-alpine AS builder
 
-# 2. Make a folder inside the container called /app
 WORKDIR /app
 
-# 3. Copy our package list into the container
-COPY package.json .
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# 4. Install all the React.js packages
-RUN npm install
-
-# 5. Copy the rest of our frontend code into the container
+# Copy source and build
 COPY . .
 
-# 6. Expose port 3000 so the outside world can connect
-EXPOSE 3000
+# VITE_API_BASE_URL is injected at build time via --build-arg
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-# 7. Start the React.js development server!
-CMD ["npm", "start"]
+RUN npm run build
+
+# ── Stage 2: Serve with nginx ─────────────────────────────────────────────────
+FROM nginx:alpine
+
+# Copy built files into nginx's serve directory
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config that handles React Router (SPA)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

@@ -35,5 +35,6 @@ urlpatterns = [
 from django.conf import settings
 from django.conf.urls.static import static
 
-if settings.DEBUG:
+# Serve media files locally when not using S3 (both dev and production)
+if not settings.AWS_ACCESS_KEY_ID:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
