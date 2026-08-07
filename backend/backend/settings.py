@@ -9,11 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 
-SECRET_KEY = "your-secret-key"
+SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key")
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -45,6 +45,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -79,16 +80,20 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 # Database
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "vatsalya_attendance",
-        "USER": "postgres",
-        "PASSWORD": "1234",
-        "HOST": "localhost",
-        "PORT": "5432",
+import dj_database_url
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password Validation
@@ -123,6 +128,8 @@ USE_TZ = True
 # Static Files
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files (uploaded user photos)
 MEDIA_URL = "/media/"
